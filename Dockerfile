@@ -24,12 +24,12 @@ COPY components ./components
 COPY public ./public
 COPY lib ./lib
 COPY hooks ./hooks
-COPY utils ./utils
-COPY types ./types
-COPY pages ./pages
+# COPY utils ./utils
+# COPY types ./types
+# COPY pages ./pages
 COPY styles ./styles
-COPY utils ./utils
-COPY utils ./utils
+# COPY utils ./utils
+# COPY utils ./utils
 
 
 # Debug: Show what was actually copied

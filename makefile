@@ -1,8 +1,7 @@
 up:
-	docker-compose up -d --build
-
+	docker-compose -f docker-compose.prod.yml up --build -d
 down:
-	docker-compose down -v
+	docker-compose -f docker-compose.prod.yml down -v
 
 restart:
 	make down

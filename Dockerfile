@@ -7,6 +7,10 @@ RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; else npm instal
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Set npm configuration to handle peer dependency conflicts
+RUN npm config set legacy-peer-deps true
+
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy package files and configs first
@@ -24,13 +28,7 @@ COPY components ./components
 COPY public ./public
 COPY lib ./lib
 COPY hooks ./hooks
-# COPY utils ./utils
-# COPY types ./types
-# COPY pages ./pages
 COPY styles ./styles
-# COPY utils ./utils
-# COPY utils ./utils
-
 
 # Debug: Show what was actually copied
 RUN echo "=== Configuration files ===" && ls -la *.json *.config.* && \

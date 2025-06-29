@@ -19,7 +19,7 @@ services:
     #   - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     command: npx next start
     ports:
-      - "3002:3000"
+      - "3002:3002"
 
   webserver:
     image: nginx:alpine

@@ -1,51 +1,37 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Create nextjs user early
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Install dependencies as nextjs user
 COPY package.json package-lock.json* ./
-RUN chown -R nextjs:nodejs /app
-USER nextjs
 RUN if [ -f package-lock.json ]; then npm ci --force; else npm install --force; fi
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 
-# Create nextjs user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy package files and configs first
+COPY package.json ./
+COPY components.json ./
+COPY tailwind.config.* ./
+COPY next.config.* ./
+COPY postcss.config.* ./
+COPY tsconfig.json ./
+COPY *.json ./
 
-# Copy dependencies with correct ownership
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --chown=nextjs:nodejs package.json ./
-COPY --chown=nextjs:nodejs components.json ./
-COPY --chown=nextjs:nodejs tailwind.config.* ./
-COPY --chown=nextjs:nodejs next.config.* ./
-COPY --chown=nextjs:nodejs postcss.config.* ./
-COPY --chown=nextjs:nodejs tsconfig.json ./
-COPY --chown=nextjs:nodejs *.json ./
-
-# Copy source directories with correct ownership
-COPY --chown=nextjs:nodejs app ./app
-COPY --chown=nextjs:nodejs components ./components
-COPY --chown=nextjs:nodejs public ./public
-COPY --chown=nextjs:nodejs lib ./lib
-COPY --chown=nextjs:nodejs hooks ./hooks
-COPY --chown=nextjs:nodejs styles ./styles
-
-# Switch to nextjs user before building
-USER nextjs
+# Copy source directories
+COPY app ./app
+COPY components ./components
+COPY public ./public
+COPY lib ./lib
+COPY hooks ./hooks
+COPY styles ./styles
 
 # Debug: Show what was actually copied
 RUN echo "=== Configuration files ===" && ls -la *.json *.config.* && \
     echo "=== Components directory ===" && ls -la components/ && \
     echo "=== Components/ui directory ===" && ls -la components/ui/ || echo "No ui directory"
 
+# Build as root (no permission issues)
 RUN npm run build
 
 # Stage 3: Production runner

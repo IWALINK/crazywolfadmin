@@ -7,9 +7,6 @@ services:
     container_name: crazy-wolf-admin-app
     restart: unless-stopped
     working_dir: /app
-    volumes:
-      - .:/app
-      - /app/node_modules
     networks:
       - crazy-wolf-net
     # environment:
@@ -20,13 +17,7 @@ services:
     #   - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
     #   - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
     #   - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-    command: >
-      sh -c "
-        echo 'Building Next.js...';
-        npm install &&
-        npm run build &&
-        npm run start
-      "
+    command: npx next start
     ports:
       - "3002:3000"
 

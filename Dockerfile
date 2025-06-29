@@ -1,19 +1,17 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; else npm install --legacy-peer-deps; fi
+COPY package.json package-lock.json* .npmrc* ./
+RUN npm config set legacy-peer-deps true
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Set npm configuration to handle peer dependency conflicts
-RUN npm config set legacy-peer-deps true
+ENV NPM_CONFIG_LEGACY_PEER_DEPS=true
 
 COPY --from=deps /app/node_modules ./node_modules
-
-# Copy package files and configs first
 COPY package.json ./
 COPY components.json ./
 COPY tailwind.config.* ./
@@ -22,18 +20,12 @@ COPY postcss.config.* ./
 COPY tsconfig.json ./
 COPY *.json ./
 
-# Copy source directories
 COPY app ./app
 COPY components ./components
 COPY public ./public
 COPY lib ./lib
 COPY hooks ./hooks
 COPY styles ./styles
-
-# Debug: Show what was actually copied
-RUN echo "=== Configuration files ===" && ls -la *.json *.config.* && \
-    echo "=== Components directory ===" && ls -la components/ && \
-    echo "=== Components/ui directory ===" && ls -la components/ui/ || echo "No ui directory"
 
 RUN npm run build
 
@@ -44,11 +36,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3002
 
-# Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules

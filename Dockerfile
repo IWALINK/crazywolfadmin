@@ -31,6 +31,7 @@ COPY tailwind.config.* .
 COPY next.config.* .
 COPY postcss.config.* .
 COPY tsconfig.json .
+COPY jsconfig.json .
 
 # source directories (case-sensitive on Linux)
 COPY app        ./app

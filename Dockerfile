@@ -2,26 +2,33 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci --only=production --legacy-peer-deps; else npm install --only=production --legacy-peer-deps; fi
+RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; else npm install --legacy-peer-deps; fi
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-# Copy package.json first
+
+# Copy package files and configs first
 COPY package.json ./
-# Copy all source files explicitly
+COPY components.json ./
+COPY tailwind.config.* ./
+COPY next.config.* ./
+COPY postcss.config.* ./
+COPY tsconfig.json ./
+COPY *.json ./
+
+# Copy source directories
 COPY app ./app
 COPY components ./components
 COPY public ./public
-COPY *.config.* ./
-COPY *.json ./
-COPY *.js ./
-COPY *.ts ./
+COPY lib ./lib
+
 # Debug: Show what was actually copied
-RUN echo "=== Files copied to container ===" && ls -la && \
+RUN echo "=== Configuration files ===" && ls -la *.json *.config.* && \
     echo "=== Components directory ===" && ls -la components/ && \
-    echo "=== App directory ===" && ls -la app/
+    echo "=== Components/ui directory ===" && ls -la components/ui/ || echo "No ui directory"
+
 RUN npm run build
 
 # Stage 3: Production runner
@@ -31,11 +38,18 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3002
 
-# Copy only what's needed to run
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
+USER nextjs
+
 EXPOSE 3002
+
 CMD ["npm", "start"]

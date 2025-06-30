@@ -18,7 +18,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (username === "admin" && password === "admin") {
       dispatch(login());
-      router.push("/");
+      router.push("/menu");
     } else {
       setError("Nom d'utilisateur ou mot de passe invalide");
     }

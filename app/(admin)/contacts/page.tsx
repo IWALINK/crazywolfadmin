@@ -62,7 +62,7 @@ interface PaginationData {
 }
 
 // Configuration API
-const base_uri = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const base_uri = process.env.NEXT_PUBLIC_API_URL || "https://backend.crazywolf-lausanne.com"
 
 export default function ContactsPage() {
   const [contacts, setContacts] = React.useState<Contact[]>([])

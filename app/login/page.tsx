@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin") {
+    if (username === 'admin' && password === "admin") {
       dispatch(login());
       router.push("/menu");
     } else {

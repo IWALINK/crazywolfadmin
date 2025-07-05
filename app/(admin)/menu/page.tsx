@@ -212,15 +212,7 @@ export default function MenuPage() {
         return
       }
 
-      // Vérifier la taille (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Erreur",
-          description: "Le fichier est trop volumineux. Taille maximum : 5MB.",
-          variant: "destructive",
-        })
-        return
-      }
+
 
       setSelectedFile(file)
       setImageError(false)
@@ -442,7 +434,7 @@ export default function MenuPage() {
                           className="cursor-pointer"
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          Formats acceptés : JPG, PNG, GIF. Taille max : 5MB
+                          Formats acceptés : JPG, PNG, GIF
                         </p>
                       </div>
                     </div>
